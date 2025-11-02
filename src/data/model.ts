@@ -1,3 +1,9 @@
+export interface Result{
+    code?: number,
+    message?: string,
+    data?: any
+}
+
 export interface UserRegister{
     name: string,
     username: string,
@@ -8,8 +14,10 @@ export interface UserRegister{
     phone?: string
 }
 
-export interface Result{
-    code?: number,
-    message?: string,
-    data?: any
+export interface UserLogin{
+    username: string,
+    password: string,
+    code: string,
+    captchaId: string
+    remember: boolean
 }

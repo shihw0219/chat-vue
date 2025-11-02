@@ -15,6 +15,7 @@
               type="text"
               placeholder=" "
               required
+              maxlength="30"
           />
           <label>用户名</label>
         </div>
@@ -25,6 +26,7 @@
               type="password"
               placeholder=" "
               required
+              maxlength="40"
           />
           <label>密码</label>
         </div>
@@ -73,11 +75,20 @@
 </template>
 
 <script setup lang="ts" name="login">
-import {ref, reactive, onMounted} from 'vue'
+import {ref, reactive, onMounted, onBeforeMount} from 'vue'
 import {getCaptchaApi} from "@/api/captchaApi.ts";
-import type {Result} from "@/data/model.ts";
+import type {Result, UserLogin} from "@/data/model.ts";
 import {ElMessage} from "element-plus";
 import router from "@/router";
+
+// 登录表单数据
+const loginForm:UserLogin = reactive({
+  username: '',
+  password: '',
+  code: '',
+  captchaId: '',
+  remember: false
+})
 
 // 图片验证码
 let captchaUrl = ref('');
@@ -97,33 +108,75 @@ const getCaptcha = () => {
 onMounted(() => {
   getCaptcha();
 })
+onBeforeMount(()=> {
+  const remember = localStorage.getItem("remember");
+  if (remember!==undefined && remember==='true') {
+    loginForm.username = localStorage.getItem("username") ?? '';
+    loginForm.password = localStorage.getItem("password") ?? '';
+    loginForm.remember = true;
+  }
+})
 
 // 加载状态
 const loading = ref(false)
 
-// 登录表单数据
-const loginForm = reactive({
-  username: '',
-  password: '',
-  code: '',
-  captchaId: '',
-  remember: false
-})
+
 // 登录
 const handleLogin = () => {
+  let isValid = validateForm();
+  if (isValid) {
+    return;
+  }
+  if (loginForm.remember) {
+    localStorage.setItem('username', loginForm.username);
+    localStorage.setItem('password', loginForm.password);
+    localStorage.setItem('remember',String(loginForm.remember));
+  }else {
+    localStorage.removeItem('username');
+    localStorage.removeItem('password');
+    localStorage.removeItem('remember');
+  }
+  // todo 用户登录
+}
 
+// 验证参数有效性
+const validateForm = () => {
+  if (!loginForm.username || loginForm.username.length < 3) {
+    ElMessage.error('用户名至少3个字符')
+    return false;
+  }
+  if (!loginForm.password || loginForm.password.length < 6) {
+    ElMessage.error('密码至少6个字符')
+    return false;
+  }
+  if (!validatePassword()) {
+    ElMessage.error('密码必须包含大小写字母和数字')
+    return false;
+  }
+  if (!loginForm.code || loginForm.code.length === 0) {
+    ElMessage.error('请输入验证码')
+    return false;
+  }
+}
+// 验证密码强度
+const validatePassword = () => {
+  const password = loginForm.password
+  if (!password) return true
+  // 检查是否包含大小写字母和数字
+  const hasUpperCase = /[A-Z]/.test(password)
+  const hasLowerCase = /[a-z]/.test(password)
+  const hasNumber = /\d/.test(password)
+  return hasUpperCase && hasLowerCase && hasNumber
 }
 
 // 跳转到注册页面
 const toRegister = () => {
   router.push('/register');
 }
-
 // 跳转到重置密码页面
 const toReset = () => {
   router.push('/reset');
 }
-
 </script>
 
 <style scoped>

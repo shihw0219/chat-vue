@@ -38,7 +38,7 @@
               type="password"
               placeholder=" "
               required
-              maxlength="20"
+              maxlength="40"
           />
           <label>密码</label>
         </div>
@@ -49,7 +49,7 @@
               type="password"
               placeholder=" "
               required
-              maxlength="20"
+              maxlength="40"
           />
           <label>确认密码</label>
         </div>
