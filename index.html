@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="app-title">%VITE_APP_NAME%</title>
+    <style>
+      * {
+          padding: 0;
+          margin: 0;
+      }
+      html,body {
+          width: 100%;
+          height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+    <script>
+        // 预定义配置（可选）
+        window.APP_CONFIG = {
+            NAME: '%VITE_APP_NAME%',
+            NAME_EN: '%VITE_APP_NAME_EN%',
+            BASE_URL: '%VITE_APP_BASE_URL%',
+            API_URL: '%VITE_APP_API_URL%'
+        };
+    </script>
+  </body>
+</html>
