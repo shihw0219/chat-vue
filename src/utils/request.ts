@@ -1,14 +1,14 @@
 import axios from "axios";
-import {ElMessage} from "element-plus";
+import {ElMessage, type LoadingInstance} from "element-plus";
 import { ElLoading } from 'element-plus'
 const request = (option:any)=>{
     const instance = axios.create({
-        baseURL: import.meta.env.VITE_APP_BASE_API
+        baseURL: import.meta.env.VITE_APP_BASE_URL
     });
-    let loading:any;
+    let loading:LoadingInstance = ElLoading.service({ fullscreen: false });
     instance.interceptors.request.use((config:any)=>{
         if (config.loading===undefined || config.loading === true) {
-             loading = ElLoading.service({ fullscreen: true });
+             loading.fullscreen.value = true;
         }
         return config;
     }, (error:any)=>{
@@ -20,7 +20,7 @@ const request = (option:any)=>{
     }, (error:any)=>{
         loading.close();
         ElMessage({
-            message: error.message,
+            message: '服务器异常，请联系客服人员',
             type: 'error',
         })
         return Promise.reject(error);
