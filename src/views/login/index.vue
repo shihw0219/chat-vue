@@ -77,10 +77,11 @@
 <script setup lang="ts" name="login">
 import {ref, reactive, onMounted, onBeforeMount} from 'vue'
 import {getCaptchaApi} from "@/api/captchaApi.ts";
-import type {Result, UserLogin} from "@/data/model.ts";
+import type {Result} from "@/data/model.ts";
 import {ElMessage} from "element-plus";
 import router from "@/router";
 import {loginApi} from "@/api/userApi.ts";
+import type {UserLogin} from "@/data/requestModel.ts";
 
 // 登录表单数据
 const loginForm:UserLogin = reactive({
@@ -137,7 +138,7 @@ const handleLogin = () => {
     localStorage.removeItem('password');
     localStorage.removeItem('remember');
   }
-  // todo 用户登录
+  // 用户登录
   loginApi(loginForm).then((res: Result) => {
     getCaptcha();
     if (res.code !== 200) {

@@ -115,8 +115,9 @@ import {ref, reactive, onBeforeUnmount} from 'vue'
 import router from "@/router";
 import {ElMessage} from "element-plus";
 import {sendRegisterMailApi} from "@/api/mailApi.ts";
-import type {Result, UserRegister} from "@/data/model.ts";
+import type {Result} from "@/data/model.ts";
 import {registerApi} from "@/api/userApi.ts";
+import type {UserRegister} from "@/data/requestModel.ts";
 
 // 倒计时相关
 const isCountingDown = ref(false)
@@ -128,17 +129,17 @@ const getEmailCode = () => {
     ElMessage.error('请输入邮箱地址');
     return;
   }
+  isCountingDown.value = true
+  timer = setInterval(() => {
+    if (isCountingDown.value && countDown.value > 0) {
+      countDown.value--
+    } else if (countDown.value === 0) {
+      isCountingDown.value = false
+      countDown.value = 60
+      clearInterval(timer)
+    }
+  }, 1000);
   sendRegisterMailApi(registerForm.email).then((res: Result) => {
-    isCountingDown.value = true
-    timer = setInterval(() => {
-      if (isCountingDown.value && countDown.value > 0) {
-        countDown.value--
-      } else if (countDown.value === 0) {
-        isCountingDown.value = false
-        countDown.value = 60
-        clearInterval(timer)
-      }
-    }, 1000);
     if (res.code !== 200) {
       ElMessage({
         message: res.message,

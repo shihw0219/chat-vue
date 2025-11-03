@@ -5,7 +5,7 @@
  */
 import router from "@/router/index";
 
-const whiteList = ["/","/login","/register","/reset"]
+const whiteList = ["/login","/register","/reset"]
 
 router.beforeEach(async (to, from, next) => {
     const path = to.path;
