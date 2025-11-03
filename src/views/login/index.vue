@@ -80,6 +80,7 @@ import {getCaptchaApi} from "@/api/captchaApi.ts";
 import type {Result, UserLogin} from "@/data/model.ts";
 import {ElMessage} from "element-plus";
 import router from "@/router";
+import {loginApi} from "@/api/userApi.ts";
 
 // 登录表单数据
 const loginForm:UserLogin = reactive({
@@ -137,6 +138,24 @@ const handleLogin = () => {
     localStorage.removeItem('remember');
   }
   // todo 用户登录
+  loginApi(loginForm).then((res: Result) => {
+    getCaptcha();
+    if (res.code !== 200) {
+      ElMessage({
+        message: res.message,
+        type: 'error'
+      })
+      return;
+    }
+    ElMessage({
+      message: res.message,
+      type: 'success'
+    })
+    let user: UserLogin = res.data;
+    localStorage.setItem("login_user", JSON.stringify(user));
+    localStorage.setItem("token", res.data.token);
+    router.push('/');
+  })
 }
 
 // 验证参数有效性

@@ -21,3 +21,16 @@ export interface UserLogin{
     captchaId: string
     remember: boolean
 }
+
+export interface UserInfo{
+    id:string,
+    name:string,
+    username:string,
+    email:string,
+    phone?:string,
+    password:string,
+    inputTokens:number,
+    outputTokens:number,
+    createTime:string,
+    token:string
+}

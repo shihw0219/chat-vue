@@ -5,16 +5,14 @@ export function registerApi(user:UserRegister){
     return request({
         url: "/user/register",
         method: "POST",
-        loading: false,
         data: user
     });
 }
 
 export function loginApi(user:UserLogin){
     return request({
-        url: "/user/register",
+        url: "/user/login",
         method: "POST",
-        loading: false,
         data: user
     });
 }

@@ -14,3 +14,18 @@ export function sendRegisterMailApi(mail:string){
         }
     });
 }
+
+/**
+ * @author shihw
+ * @Date 2025/11/3 16:04
+ * @description 获取重置密码邮箱验证码
+*/
+export function sendResetPasswordCode(username:string){
+    return request({
+        url: "/mail/sendResetPasswordCode",
+        method: "POST",
+        data: {
+            'username':username
+        }
+    });
+}
