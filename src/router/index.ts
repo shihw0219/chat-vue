@@ -6,7 +6,7 @@ const router = createRouter({
   routes: [
       {
         path: '/',
-        redirect: '/index'
+        redirect: '/main'
       },
       {
           path: '/login',
@@ -21,14 +21,18 @@ const router = createRouter({
           name: 'reset',
           component: () => import('@/views/resetPassword/index.vue'),
       },{
-          path: '/',
+          path: '/main',
           name: 'main',
           component: () => import('@/views/main/index.vue'),
           children: [
               {
+                  path: '',
+                  redirect: '/main/index'
+              },
+              {
                   path: 'index',
                   name: 'index',
-                  component: () => import('@/views/main/index.vue'),
+                  component: () => import('@/views/index/index.vue'),
               }
           ]
       }
