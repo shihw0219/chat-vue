@@ -19,7 +19,6 @@
           </el-col>
         </el-row>
       </div>
-      
       <el-row class="history-row">
         <el-col :span="24">
           <div class="history-list">
@@ -35,9 +34,37 @@
               <span class="history-title">
                 {{ item.title }}
               </span>
-              <transition name="el-fade-in-linear">
-                <span v-show="currentHover===item.id" class="more">···</span>
-              </transition>
+              <el-dropdown 
+                placement="bottom-start"
+                trigger="hover"
+                style="width: 20%;"
+              >
+                <transition name="el-fade-in-linear">
+                  <el-button size="small" v-if="currentHover===item.id || activeChatId===item.id" class="more">···</el-button>
+                </transition>
+                <template #dropdown>
+                  <el-dropdown-menu  @mouseenter="currentHover=item.id" @mouseleave="currentHover=null">
+                    <el-dropdown-item>
+                      <el-icon :size="18" color="#606266">
+                        <EditPen />
+                      </el-icon>
+                      重命名
+                    </el-dropdown-item>
+                    <el-dropdown-item>
+                      <el-icon :size="18" color="#606266">
+                        <Flag />
+                      </el-icon>
+                      置顶
+                    </el-dropdown-item>
+                    <el-dropdown-item>
+                      <el-icon :size="18" color="#e55765">
+                        <Delete/>
+                      </el-icon>
+                      删除
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
           </div>
         </el-col>
@@ -58,6 +85,7 @@
     </el-aside>
     <el-main class="main">
 
+
     </el-main>
   </el-container>
 </template>
@@ -65,6 +93,7 @@
 <script setup lang="ts" name="main">
 import {type Ref, ref} from 'vue'
 import type {UserInfo} from "@/data/model.ts";
+import {Edit} from '@element-plus/icons-vue'
 // 加载用户信息
 let currentHover:Ref<number|null> = ref(null)
 let user:UserInfo = JSON.parse(<string>localStorage.getItem("login_user"));
@@ -152,12 +181,7 @@ const selectChat = (chat: { id: number }) => {
   overflow-y: auto;
 }
 
-.history-title {
-  width:80%;
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+
 
 .history-row::-webkit-scrollbar {
   width: 6px;
@@ -188,10 +212,17 @@ const selectChat = (chat: { id: number }) => {
   margin-bottom: 5px;
   font-size: 15px;
   color: #374151;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.history-title {
+  width:80%;
+  display: inline-block;
+  overflow: hidden;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: all 0.2s ease;
 }
 
 .history-item:hover {
@@ -206,18 +237,24 @@ const selectChat = (chat: { id: number }) => {
 
 .more {
   float: right;
-  font-size: 10px;
+  font-size: 18px;
+  font-weight: 600;
   background-color: #e7eaea;
   border-radius: 5px;
-  width: 20%;
-  height: 24px;
-  line-height: 24px;
   text-align: center;
   transition: all 0.3s ease;
   display: inline-block;
+  border: 0px;
+  outline: none;
+  box-shadow: none;
 }
-.more:hover {
+
+.more:hover, .more:focus {
+  color: #1f2937;
   background-color: #d8d8d8;
+  border: 0px;
+  outline: none;
+  box-shadow: none;
 }
 
 .user-info {
