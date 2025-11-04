@@ -1,8 +1,8 @@
 import axios from "axios";
-import {ElMessage, type LoadingInstance} from "element-plus";
+import {ElMessage} from "element-plus";
 import { ElLoading } from 'element-plus'
 import router from "@/router";
-import type {UserInfo, UserLogin} from "@/data/model.ts";
+import type {UserInfo} from "@/data/model.ts";
 const request = (option:any)=>{
     const instance = axios.create({
         baseURL: import.meta.env.VITE_APP_BASE_URL

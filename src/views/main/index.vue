@@ -32,7 +32,9 @@
               @mouseenter="currentHover=item.id"
               @mouseleave="currentHover=null"
             >
-              {{ item.title }}
+              <span class="history-title">
+                {{ item.title }}
+              </span>
               <transition name="el-fade-in-linear">
                 <span v-show="currentHover===item.id" class="more">···</span>
               </transition>
@@ -69,20 +71,16 @@ let user:UserInfo = JSON.parse(<string>localStorage.getItem("login_user"));
 
 // 聊天历史数据
 const chatHistory = ref([
-  { id: 1, title: '对话 1' },
-  { id: 2, title: '对话 2' },
-  { id: 3, title: '对话 3' },
-  { id: 4, title: '技术问题讨论' },
-  { id: 5, title: '日常交流' },
-  { id: 6, title: '项目规划讨论' },
-  { id: 7, title: '学习心得分享' },
-  { id: 8, title: '工作安排沟通' },
-  { id: 9, title: '产品需求分析' },
-  { id: 10, title: '设计方案评审' },
-  { id: 10, title: '设计方案评审' },
-  { id: 10, title: '设计方案评审' },
-  { id: 10, title: '设计方案评审' },
-  { id: 10, title: '设计方案评审' },
+  { id: 1, title: '对话 1',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 2, title: '对话 2',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 3, title: '对话 3',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 4, title: '对话 4',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 5, title: '对话 5',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 6, title: '对话 6对话 6对话 6对话 6对话 6对话 6对话 6对话 6',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 7, title: '对话 7',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 8, title: '对话 8',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 9, title: '对话 9',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 10, title: '对话 10',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
 ])
 
 // 当前选中的聊天ID
@@ -154,6 +152,13 @@ const selectChat = (chat: { id: number }) => {
   overflow-y: auto;
 }
 
+.history-title {
+  width:80%;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .history-row::-webkit-scrollbar {
   width: 6px;
 }
@@ -201,15 +206,15 @@ const selectChat = (chat: { id: number }) => {
 
 .more {
   float: right;
-  font-size: 14px;
+  font-size: 10px;
   background-color: #e7eaea;
   border-radius: 5px;
-  width: 35px;
-  height: 21px;
-  line-height: 21px;
+  width: 20%;
+  height: 24px;
+  line-height: 24px;
   text-align: center;
-  font-weight: 600;
   transition: all 0.3s ease;
+  display: inline-block;
 }
 .more:hover {
   background-color: #d8d8d8;
