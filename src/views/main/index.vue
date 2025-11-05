@@ -8,12 +8,13 @@
               src="https://image0219.oss-cn-hangzhou.aliyuncs.com/images/logo_1.png" 
               class="logo hvr-pulse-grow"
               fit="contain"
+              @click="toIndex"
             />
           </el-col>
         </el-row>
         <el-row class="button-row">
           <el-col :span="24">
-            <el-button type="primary" plain round icon="Plus" class="start-btn hvr-wobble-top">
+            <el-button @click="toIndex" type="primary" plain round icon="Plus" class="start-btn hvr-wobble-top">
               开启新对话
             </el-button>
           </el-col>
@@ -128,25 +129,33 @@
 
 <script setup lang="ts" name="main">
 import {type Ref, ref} from 'vue'
-import type {UserInfo} from "@/data/model.ts";
+import type {Result, UserInfo} from "@/data/model.ts";
 import {Edit} from '@element-plus/icons-vue'
+import router from "@/router";
+import {listApi} from "@/api/sessionApi.ts";
+import {ElMessage} from "element-plus";
+
 // 加载用户信息
 let currentHover:Ref<number|null> = ref(null)
 let user:UserInfo = JSON.parse(<string>localStorage.getItem("login_user"));
 
-// 聊天历史数据
-const chatHistory = ref([
-  { id: 1, title: '对话 1',messageCount:5,isTop:1,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 2, title: '对话 2',messageCount:5,isTop:1,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 3, title: '对话 3',messageCount:5,isTop:1,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 4, title: '对话 4',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 5, title: '对话 5',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 6, title: '对话 6对话 6对话 6对话 6对话 6对话 6对话 6对话 6',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 7, title: '对话 7',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 8, title: '对话 8',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 9, title: '对话 9',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 10, title: '对话 10',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-])
+
+// 获取聊天列表
+const chatHistory = ref([])
+const getChatList = () => {
+  listApi().then((res:Result) => {
+    if (res.code !== 200) {
+      ElMessage({
+        message: res.message,
+        type: 'error',
+      })
+      return;
+    }
+    chatHistory.value = res.data;
+  })
+}
+getChatList();
+
 
 // 当前选中的聊天ID
 const activeChatId = ref(1)
@@ -154,6 +163,11 @@ const activeChatId = ref(1)
 // 选择聊天
 const selectChat = (chat: { id: number }) => {
   activeChatId.value = chat.id
+}
+
+
+const toIndex = () => {
+  router.push('/');
 }
 </script>
 

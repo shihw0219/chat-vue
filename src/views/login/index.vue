@@ -107,17 +107,25 @@ const getCaptcha = () => {
     }
   })
 }
-onMounted(() => {
-  getCaptcha();
-})
-onBeforeMount(()=> {
-  const remember = localStorage.getItem("remember");
-  if (remember!==undefined && remember==='true') {
-    loginForm.username = localStorage.getItem("username") ?? '';
-    loginForm.password = localStorage.getItem("password") ?? '';
-    loginForm.remember = true;
-  }
-})
+getCaptcha();
+
+
+// 判断是否记住我，自动填充数据
+const remember = localStorage.getItem("remember");
+if (remember!==undefined && remember==='true') {
+  loginForm.username = localStorage.getItem("username") ?? '';
+  loginForm.password = localStorage.getItem("password") ?? '';
+  loginForm.remember = true;
+}
+
+// onBeforeMount(()=> {
+//   const remember = localStorage.getItem("remember");
+//   if (remember!==undefined && remember==='true') {
+//     loginForm.username = localStorage.getItem("username") ?? '';
+//     loginForm.password = localStorage.getItem("password") ?? '';
+//     loginForm.remember = true;
+//   }
+// })
 
 // 加载状态
 const loading = ref(false)

@@ -8,25 +8,11 @@ const request = (option:any)=>{
         baseURL: import.meta.env.VITE_APP_BASE_URL
     });
     let loading:any;
-    let whiteUri:string[] = ['/user/register','/user/login','/mail/sendRegisterMail','/captcha/getCaptcha','/mail/sendResetPasswordCode','/user/resetPassword'];
     instance.interceptors.request.use((config:any)=>{
-        let token = localStorage.getItem('token');
-        let login_user = localStorage.getItem('login_user');
-        let url = config.url;
-        if (whiteUri.indexOf(url) === -1 && (token === undefined || token === null || login_user === undefined || login_user === null) ) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('login_user');
-            ElMessage({
-                type: 'error',
-                message: '用户信息不存在，请重新登录'
-            })
-            router.push('/login');
-            return;
-        }
         if (config.loading===undefined || config.loading === true) {
             loading = ElLoading.service({ fullscreen: true });
         }
-        if (localStorage.getItem("token") !==undefined && localStorage.getItem("token")! == null){
+        if (localStorage.getItem("token") !==undefined && localStorage.getItem("token")!== null){
             config.headers = {
                 ...config.headers,
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -44,7 +30,14 @@ const request = (option:any)=>{
             localStorage.setItem("token", response.headers['Fresh-Token']);
             let loginUser:UserInfo = JSON.parse(<string>localStorage.getItem("login_user"));
             loginUser.token = response.headers['Fresh-Token'];
+            localStorage.setItem("login_user", JSON.stringify(loginUser));
         }
+        // if (response.data.code===401) {
+        //     ElMessage.error(response.data.message);
+        //     localStorage.removeItem("login_user");
+        //     localStorage.removeItem("token");
+        //     router.push("/login");
+        // }
         return response.data;
     }, (error:any)=>{
         if (loading !== undefined) {
