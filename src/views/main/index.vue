@@ -26,13 +26,14 @@
               v-for="item in chatHistory" 
               :key="item.id" 
               class="history-item"
-              :class="{ active: item.id === activeChatId }"
+              :class="{ active: item.id === activeChatId,top:item.isTop===1 }"
               @click="selectChat(item)"
               @mouseenter="currentHover=item.id"
               @mouseleave="currentHover=null"
             >
               <span class="history-title">
                 {{ item.title }}
+                <el-icon v-if="item.isTop===1" color="#4c88f4"><Flag /></el-icon>
               </span>
               <el-dropdown 
                 placement="bottom-start"
@@ -50,12 +51,19 @@
                       </el-icon>
                       重命名
                     </el-dropdown-item>
-                    <el-dropdown-item>
+                    <el-dropdown-item v-if="item.isTop === 0">
                       <el-icon :size="18" color="#606266">
-                        <Flag />
+                        <Upload />
                       </el-icon>
                       置顶
                     </el-dropdown-item>
+                    <el-dropdown-item v-else>
+                      <el-icon :size="18" color="#606266">
+                        <Download />
+                      </el-icon>
+                      取消置顶
+                    </el-dropdown-item>
+
                     <el-dropdown-item>
                       <el-icon :size="18" color="#e55765">
                         <Delete/>
@@ -69,22 +77,50 @@
           </div>
         </el-col>
       </el-row>
-      
-      <div class="user-info">
-        <el-row class="user-row">
-          <el-col :span="6" class="avatar-col">
-            <!--<el-avatar :size="40" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />-->
-            <el-avatar class="avatar" :size="40">{{user.username.substring(0,1)}}</el-avatar>
-          </el-col>
-          <el-col :span="18" class="info-col">
-            <div class="user-name">{{user.username}}</div>
-            <div class="user-email">{{user.email}}</div>
-          </el-col>
-        </el-row>
-      </div>
-    </el-aside>
-    <el-main class="main">
 
+      <el-dropdown
+          placement="bottom-start"
+          trigger="click"
+      >
+        <div class="user-info">
+          <el-row class="user-row">
+            <el-col :span="6" class="avatar-col">
+              <!--<el-avatar :size="40" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />-->
+              <el-avatar class="avatar" :size="40">{{user.username.substring(0,1)}}</el-avatar>
+            </el-col>
+            <el-col :span="18" class="info-col">
+              <div class="user-name">{{user.username}}</div>
+              <div class="user-email">{{user.email}}</div>
+            </el-col>
+          </el-row>
+        </div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item>
+              <el-icon :size="18" color="#606266">
+                <User />
+              </el-icon>
+              个人信息
+            </el-dropdown-item>
+            <el-dropdown-item>
+              <el-icon :size="18" color="#606266">
+                <Edit />
+              </el-icon>
+              修改密码
+            </el-dropdown-item>
+            <el-dropdown-item>
+              <el-icon :size="18" color="#e55765">
+                <SwitchButton />
+              </el-icon>
+              <span style="color: #ec5445">退出登录</span>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </el-aside>
+
+    <el-main class="main">
+      <router-view class="animate__animated animate__headShake"/>
 
     </el-main>
   </el-container>
@@ -100,16 +136,16 @@ let user:UserInfo = JSON.parse(<string>localStorage.getItem("login_user"));
 
 // 聊天历史数据
 const chatHistory = ref([
-  { id: 1, title: '对话 1',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 2, title: '对话 2',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 3, title: '对话 3',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 4, title: '对话 4',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 5, title: '对话 5',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 6, title: '对话 6对话 6对话 6对话 6对话 6对话 6对话 6对话 6',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 7, title: '对话 7',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 8, title: '对话 8',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 9, title: '对话 9',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
-  { id: 10, title: '对话 10',messageCount:5,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 1, title: '对话 1',messageCount:5,isTop:1,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 2, title: '对话 2',messageCount:5,isTop:1,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 3, title: '对话 3',messageCount:5,isTop:1,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 4, title: '对话 4',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 5, title: '对话 5',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 6, title: '对话 6对话 6对话 6对话 6对话 6对话 6对话 6对话 6',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 7, title: '对话 7',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 8, title: '对话 8',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 9, title: '对话 9',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
+  { id: 10, title: '对话 10',messageCount:5,isTop:0,createTime:'2025-11-04',updateTime:'2025-11-04',userId:'jifewojf',deleted:0,inputTokens:100,outputTokens:1999 },
 ])
 
 // 当前选中的聊天ID
@@ -181,24 +217,22 @@ const selectChat = (chat: { id: number }) => {
   overflow-y: auto;
 }
 
-
-
 .history-row::-webkit-scrollbar {
-  width: 6px;
+  width: 0px;
+  background: transparent;
 }
 
 .history-row::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0);
-  border-radius: 3px;
-  transition: background-color 0.2s;
-}
-
-.history-row:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 0px;
 }
 
 .history-row::-webkit-scrollbar-track {
   background-color: transparent;
+}
+
+.top {
+  background-color: #edeff1;
 }
 
 .history-list {
@@ -258,6 +292,8 @@ const selectChat = (chat: { id: number }) => {
 }
 
 .user-info {
+  width: 100%;
+  box-sizing: border-box;
   border-top: 1px solid #e5e7eb;
   padding: 15px 10px;
   background-color: #f9fafb;
@@ -267,10 +303,20 @@ const selectChat = (chat: { id: number }) => {
 
 .user-info:hover {
   background-color: #eeefef;
+  border-top: 1px solid #e5e7eb;
+  outline: none;
+  box-shadow: none;
   cursor: pointer;
   .avatar {
     background-color: #d8d8d8 !important;
   }
+}
+
+.user-info:focus {
+  border-top: 1px solid #e5e7eb;
+  outline: none;
+  box-shadow: none;
+  cursor: pointer;
 }
 
 .user-row {
@@ -317,5 +363,6 @@ const selectChat = (chat: { id: number }) => {
   flex-direction: column;
   height: 100%;
   padding: 0;
+  overflow: hidden;
 }
 </style>
