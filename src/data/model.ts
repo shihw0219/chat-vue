@@ -18,3 +18,27 @@ export interface UserInfo{
     createTime:string,
     token:string
 }
+
+export interface Model {
+    id:string,
+    name:string,
+    createTime:string,
+    enabled:number,
+    modelId:string,
+    inputPrice:number,
+    outputPrice:number,
+    deleted:number
+}
+
+export interface Session {
+    id:string,
+    title:string,
+    messageCount:number,
+    userId:string,
+    isTop:number,
+    inputTokens:number,
+    outputTokens:number,
+    createTime:string,
+    updateTime:string
+    deleted:number
+}

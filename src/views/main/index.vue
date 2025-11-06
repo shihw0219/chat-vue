@@ -24,7 +24,7 @@
         <el-col :span="24">
           <div class="history-list">
             <div 
-              v-for="item in chatHistory" 
+              v-for="item in sessionHistory"
               :key="item.id" 
               class="history-item"
               :class="{ active: item.id === activeChatId,top:item.isTop===1 }"
@@ -33,7 +33,7 @@
               @mouseleave="currentHover=null"
             >
               <span class="history-title">
-                {{ item.title }}
+                {{item.title}}
                 <el-icon v-if="item.isTop===1" color="#4c88f4"><Flag /></el-icon>
               </span>
               <el-dropdown 
@@ -121,7 +121,8 @@
     </el-aside>
 
     <el-main class="main">
-      <router-view class="animate__animated animate__headShake"/>
+      <!--<router-view class="animate__animated animate__headShake"/>-->
+      <router-view/>
 
     </el-main>
   </el-container>
@@ -129,21 +130,21 @@
 
 <script setup lang="ts" name="main">
 import {type Ref, ref} from 'vue'
-import type {Result, UserInfo} from "@/data/model.ts";
+import type {Result, Session, UserInfo} from "@/data/model.ts";
 import {Edit} from '@element-plus/icons-vue'
 import router from "@/router";
-import {listApi} from "@/api/sessionApi.ts";
+import {sessionListApi} from "@/api/sessionApi.ts";
 import {ElMessage} from "element-plus";
 
 // 加载用户信息
-let currentHover:Ref<number|null> = ref(null)
+let currentHover:Ref<string|null> = ref(null)
 let user:UserInfo = JSON.parse(<string>localStorage.getItem("login_user"));
 
 
 // 获取聊天列表
-const chatHistory = ref([])
-const getChatList = () => {
-  listApi().then((res:Result) => {
+const sessionHistory:Ref<Session[]> = ref([])
+const getSessionList = () => {
+  sessionListApi().then((res:Result) => {
     if (res.code !== 200) {
       ElMessage({
         message: res.message,
@@ -151,18 +152,27 @@ const getChatList = () => {
       })
       return;
     }
-    chatHistory.value = res.data;
+    sessionHistory.value = res.data;
   })
 }
-getChatList();
+getSessionList();
 
 
 // 当前选中的聊天ID
-const activeChatId = ref(1)
+const activeChatId = ref("")
 
 // 选择聊天
-const selectChat = (chat: { id: number }) => {
-  activeChatId.value = chat.id
+const selectChat = (chat: { id: string }) => {
+  activeChatId.value = chat.id;
+  router.push(`/main/chat/${chat.id}`);
+  // router.push(
+  //     {
+  //       name: 'chat',
+  //       params: {
+  //         id: chat.id,
+  //       },
+  //     }
+  // );
 }
 
 

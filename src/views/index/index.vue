@@ -9,7 +9,7 @@
         <el-input input-style="padding:20px;border-radius:20px;box-sizing:border-box;font-size:16px;box-shadow: rgba(191, 191, 193, 0.6) 5px 5px 30px;" placeholder="给Even发送消息" type="textarea" resize="none" v-model="text" :autosize="{ minRows: 3, maxRows: 6 }" />
       </div>
       <div class="btnBox">
-        <el-tag size="large" class="tag">deepseek r1</el-tag>
+        <el-tag size="large" v-if="currentModel!==null" class="tag">{{currentModel.name}}</el-tag>
         <el-dropdown
             placement="bottom-start"
             trigger="click"
@@ -18,50 +18,61 @@
           <el-button class="modelBtn" type="warning" round :icon="Tools" color="#eef3fd">模型</el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item v-for="item in modelList" :key="item.id" :disabled="item.enabled===0">
+              <el-dropdown-item @click="changeModel(item)" v-for="item in modelList" :key="item.id" :disabled="item.enabled===0">
                 {{item.name}}
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <el-button class="sendBtn" type="primary" round :icon="ArrowUpBold" color="#4363f5">发送</el-button>
+        <el-button class="sendBtn" type="primary" round :icon="ArrowUpBold" color="#4363f5" :disabled="btnDisabled">发送</el-button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts" name="index">
-import {ref} from "vue";
+import {type Ref, ref} from "vue";
 import {ArrowUpBold, Edit, Tools} from "@element-plus/icons-vue";
+import {modelListApi} from "@/api/modelApi.ts";
+import type {Model, Result} from "@/data/model.ts";
+import {ElMessage} from "element-plus";
+
+// 模型列表
+let currentModel:Ref<Model|null> = ref(null);
+let modelList:Ref<Model[]> = ref([]);
+const getModelList = () => {
+  modelListApi().then((res:Result) => {
+    if (res.code === 200) {
+      modelList.value = res.data;
+      if (modelList.value.length > 0 && modelList.value[0]!==undefined) {
+        modelList.value.forEach(item => {
+          if (item.enabled===1) {
+            currentModel.value = item;
+          }
+        })
+      }
+      return;
+    }
+    ElMessage.error(res.message);
+  })
+}
+getModelList();
+
+// 切换模型
+const changeModel = (model:Model) => {
+  currentModel.value = model;
+}
+
+// 发送按钮是否禁用
+const btnDisabled = () => {
+  if (currentModel===null || text.value.trim().length===0) {
+    return true;
+  }
+}
 
 let text = ref('');
 
-let modelList = ref([
-  {
-    id: 'jifoew',
-    name: 'gpt-3.5-turbo',
-    modelId: 'gpt-3.5-turbo',
-    enabled: 1
-  },
-  {
-    id: '6f156we',
-    name: 'gpt-4',
-    modelId: 'gpt-4',
-    enabled: 0
-  },
-  {
-    id: '51f5e165',
-    name: 'gpt-4',
-    modelId: 'gpt-4',
-    enabled: 0
-  },
-  {
-    id: '1gre65g1e5',
-    name: 'gpt-4',
-    modelId: 'gpt-4',
-    enabled: 1
-  }
-]);
+
 
 </script>
 
