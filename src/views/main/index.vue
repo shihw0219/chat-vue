@@ -27,7 +27,7 @@
               v-for="item in sessionHistory"
               :key="item.id" 
               class="history-item"
-              :class="{ active: item.id === activeChatId,top:item.isTop===1 }"
+              :class="{ active: item.id === currentSessionId,top:item.isTop===1 }"
               @click="selectChat(item)"
               @mouseenter="currentHover=item.id"
               @mouseleave="currentHover=null"
@@ -42,7 +42,7 @@
                 style="width: 20%;"
               >
                 <transition name="el-fade-in-linear">
-                  <el-button size="small" v-if="currentHover===item.id || activeChatId===item.id" class="more">···</el-button>
+                  <el-button size="small" v-if="currentHover===item.id || currentSessionId===item.id" class="more">···</el-button>
                 </transition>
                 <template #dropdown>
                   <el-dropdown-menu  @mouseenter="currentHover=item.id" @mouseleave="currentHover=null">
@@ -97,19 +97,19 @@
         </div>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item>
+            <el-dropdown-item @click="showInfo">
               <el-icon :size="18" color="#606266">
                 <User />
               </el-icon>
               个人信息
             </el-dropdown-item>
-            <el-dropdown-item>
+            <el-dropdown-item @click="resetPassword">
               <el-icon :size="18" color="#606266">
                 <Edit />
               </el-icon>
               修改密码
             </el-dropdown-item>
-            <el-dropdown-item>
+            <el-dropdown-item @click="logout">
               <el-icon :size="18" color="#e55765">
                 <SwitchButton />
               </el-icon>
@@ -121,25 +121,43 @@
     </el-aside>
 
     <el-main class="main">
-      <!--<router-view class="animate__animated animate__headShake"/>-->
-      <router-view/>
-
+      <router-view :class="router.currentRoute.value.path==='/main/index'?'animate__animated animate__bounceInDown ':'animate__animated animate__fadeIn'"/>
+      <!--<router-view/>-->
     </el-main>
+
+    <!--个人信息-->
+    <el-dialog v-model="userInfoVisible" title="" width="800">
+      <el-descriptions title="个人信息" border>
+        <el-descriptions-item label="用户名">{{user.username}}</el-descriptions-item>
+        <el-descriptions-item label="姓名">{{user.name}}</el-descriptions-item>
+        <el-descriptions-item label="联系方式">{{user.phone}}</el-descriptions-item>
+        <el-descriptions-item label="用户角色">
+          <el-tag size="small" v-for="(item, i) in user.roleNames" :key="i">{{item}}</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="输入Token总数">{{user.inputTokens}} K</el-descriptions-item>
+        <el-descriptions-item label="输出Token总数">{{user.outputTokens}} K</el-descriptions-item>
+        <el-descriptions-item label="邮箱">{{user.email}} K</el-descriptions-item>
+        <el-descriptions-item label="账号创建时间">{{user.createTime}}</el-descriptions-item>
+      </el-descriptions>
+    </el-dialog>
+
   </el-container>
 </template>
 
-<script setup lang="ts" name="main">
-import {type Ref, ref} from 'vue'
+<script setup lang="ts" name="AppMain">
+import {type Ref, ref, watch} from 'vue'
 import type {Result, Session, UserInfo} from "@/data/model.ts";
 import {Edit} from '@element-plus/icons-vue'
 import router from "@/router";
 import {sessionListApi} from "@/api/sessionApi.ts";
-import {ElMessage} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
+import {useSessionStore} from "@/stores/sessionStore.ts";
+import {storeToRefs} from "pinia";
+import {logoutApi} from "@/api/userApi.ts";
 
 // 加载用户信息
 let currentHover:Ref<string|null> = ref(null)
 let user:UserInfo = JSON.parse(<string>localStorage.getItem("login_user"));
-
 
 // 获取聊天列表
 const sessionHistory:Ref<Session[]> = ref([])
@@ -157,25 +175,61 @@ const getSessionList = () => {
 }
 getSessionList();
 
-
-// 当前选中的聊天ID
-const activeChatId = ref("")
+// 初始化选中会话
+const sessionStore = storeToRefs(useSessionStore());
+let currentSessionId =  sessionStore.currentSessionId;
+// 监控当前选中会话
+const currentSessionWatch = watch(sessionStore.currentSessionId, (newValue, oldValue) => {
+  currentSessionId = ref(newValue);
+})
+currentSessionWatch();
 
 // 选择聊天
-const selectChat = (chat: { id: string }) => {
-  activeChatId.value = chat.id;
-  router.push(`/main/chat/${chat.id}`);
-  // router.push(
-  //     {
-  //       name: 'chat',
-  //       params: {
-  //         id: chat.id,
-  //       },
-  //     }
-  // );
+const selectChat = (session: Session) => {
+  sessionStore.currentSessionId.value = session.id;
+  router.push('/main/chat');
 }
 
+// 显示个人信息
+let userInfoVisible = ref(false);
+const showInfo = () => {
+  userInfoVisible.value = true;
+  console.log(user);
+}
 
+// 重置密码
+const resetPassword = () => {
+  console.log("重置密码");
+}
+
+// 退出登录
+const logout = () => {
+  ElMessageBox.confirm(
+    '您正在退出登录，是否继续?',
+    '提示',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(() => {
+    logoutApi().then((res:Result) => {
+      if (res.code !== 200) {
+        ElMessage({
+          message: res.message,
+          type: 'error',
+        })
+        return;
+      }
+      ElMessage.success(res.message);
+      localStorage.removeItem("login_user");
+      localStorage.removeItem("token");
+      router.push('/login');
+    })
+  })
+}
+
+// 跳转到首页
 const toIndex = () => {
   router.push('/');
 }
@@ -360,6 +414,12 @@ const toIndex = () => {
   font-size: 18px;
   font-weight: 800;
   transition: all 0.3s ease;
+}
+
+.avatarInfo {
+  color: #000;
+  font-size: 18px;
+  font-weight: 800;
 }
 
 .info-col {

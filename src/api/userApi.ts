@@ -39,3 +39,16 @@ export function resetPasswordApi(user:UserRest){
         data: user
     });
 }
+
+/**
+ * @author shihw
+ * @Date 2025/11/6 21:48
+ * @description 退出登录
+*/
+export function logoutApi(){
+    return request({
+        url: "/user/logout",
+        method: "GET"
+    });
+}
+

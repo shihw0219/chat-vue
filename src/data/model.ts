@@ -16,7 +16,9 @@ export interface UserInfo{
     inputTokens:number,
     outputTokens:number,
     createTime:string,
-    token:string
+    token:string,
+    roleIds:string[],
+    roleNames:string[]
 }
 
 export interface Model {

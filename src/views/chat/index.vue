@@ -7,10 +7,16 @@
 <script setup lang="ts" name="index">
 // 接收会话ID
 import {useRoute} from "vue-router";
-import {ref} from "vue";
+import {onUpdated, type Ref, ref} from "vue";
+import {useSessionStore} from "@/stores/sessionStore.ts";
+import {storeToRefs} from "pinia";
+// 获取会话ID
+const sessionStore = storeToRefs(useSessionStore());
+let sessionId:Ref<string> = sessionStore.currentSessionId;
 
-const route = useRoute();
-const sessionId = route.params.id;
+onUpdated(()=> {
+  sessionId = sessionStore.currentSessionId;
+})
 </script>
 
 <style scoped>

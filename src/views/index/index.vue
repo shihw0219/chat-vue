@@ -36,7 +36,10 @@ import {ArrowUpBold, Edit, Tools} from "@element-plus/icons-vue";
 import {modelListApi} from "@/api/modelApi.ts";
 import type {Model, Result} from "@/data/model.ts";
 import {ElMessage} from "element-plus";
-
+import {useSessionStore} from "@/stores/sessionStore.ts";
+// 删除当前选中会话
+const sessionStore = useSessionStore();
+sessionStore.currentSessionId = '';
 // 模型列表
 let currentModel:Ref<Model|null> = ref(null);
 let modelList:Ref<Model[]> = ref([]);
@@ -64,10 +67,12 @@ const changeModel = (model:Model) => {
 }
 
 // 发送按钮是否禁用
-const btnDisabled = () => {
+let btnDisabled:Ref<boolean> = ref(true);
+const isBtnDisabled = () => {
   if (currentModel===null || text.value.trim().length===0) {
-    return true;
+    btnDisabled.value = true;
   }
+  btnDisabled.value = false;
 }
 
 let text = ref('');

@@ -27,6 +27,7 @@ const router = createRouter({
           children: [
               {
                   path: '',
+                  name:'rIndex',
                   redirect: '/main/index'
               },
               {
@@ -35,7 +36,7 @@ const router = createRouter({
                   component: () => import('@/views/index/index.vue'),
               },
               {
-                  path: 'chat/:id',
+                  path: 'chat',
                   name: 'chat',
                   component: () => import('@/views/chat/index.vue'),
               }
