@@ -9,5 +9,7 @@ export const useSessionStore = defineStore('session', {
     state: (): SessionState => ({
         currentSessionId: ''
     }),
-    persist: true
+    persist: {
+        storage: sessionStorage
+    }
 });

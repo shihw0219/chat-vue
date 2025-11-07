@@ -6,7 +6,7 @@
         <h2>我们一起来探索奥秘吧？</h2>
       </div>
       <div class="inputBox">
-        <el-input input-style="padding:20px;border-radius:20px;box-sizing:border-box;font-size:16px;box-shadow: rgba(191, 191, 193, 0.6) 5px 5px 30px;" placeholder="给Even发送消息" type="textarea" resize="none" v-model="text" :autosize="{ minRows: 3, maxRows: 6 }" />
+        <el-input @input="inputChange" input-style="padding:20px;border-radius:20px;box-sizing:border-box;font-size:16px;box-shadow: rgba(191, 191, 193, 0.6) 5px 5px 30px;" placeholder="给Even发送消息" type="textarea" resize="none" v-model="text" :autosize="{ minRows: 3, maxRows: 6 }" />
       </div>
       <div class="btnBox">
         <el-tag size="large" v-if="currentModel!==null" class="tag">{{currentModel.name}}</el-tag>
@@ -51,6 +51,7 @@ const getModelList = () => {
         modelList.value.forEach(item => {
           if (item.enabled===1) {
             currentModel.value = item;
+            isBtnDisabled();
           }
         })
       }
@@ -71,12 +72,16 @@ let btnDisabled:Ref<boolean> = ref(true);
 const isBtnDisabled = () => {
   if (currentModel===null || text.value.trim().length===0) {
     btnDisabled.value = true;
+  }else {
+    btnDisabled.value = false;
   }
-  btnDisabled.value = false;
+
 }
 
 let text = ref('');
-
+const inputChange = () => {
+  isBtnDisabled();
+}
 
 
 </script>

@@ -4,6 +4,7 @@
  * @description
  */
 import router from "@/router/index";
+import {useSessionStore} from "@/stores/sessionStore.ts";
 
 const whiteList = ["/login","/register","/reset"]
 
@@ -17,6 +18,14 @@ router.beforeEach(async (to, from, next) => {
                 path: '/main/index'
             });
         }else {
+            if (to.path === "/main/chat"){
+                let sessionStore = useSessionStore();
+                if (sessionStore.currentSessionId===null || sessionStore.currentSessionId===''){
+                    next({
+                        path: '/main/index'
+                    });
+                }
+            }
             next();
         }
     }else{

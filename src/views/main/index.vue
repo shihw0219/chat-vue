@@ -109,6 +109,12 @@
               </el-icon>
               修改密码
             </el-dropdown-item>
+            <el-dropdown-item @click="showBill">
+              <el-icon :size="18" color="#606266">
+                <Memo />
+              </el-icon>
+              我的账单
+            </el-dropdown-item>
             <el-dropdown-item @click="logout">
               <el-icon :size="18" color="#e55765">
                 <SwitchButton />
@@ -134,11 +140,14 @@
         <el-descriptions-item label="用户角色">
           <el-tag size="small" v-for="(item, i) in user.roleNames" :key="i">{{item}}</el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="输入Token总数">{{user.inputTokens}} K</el-descriptions-item>
-        <el-descriptions-item label="输出Token总数">{{user.outputTokens}} K</el-descriptions-item>
         <el-descriptions-item label="邮箱">{{user.email}} K</el-descriptions-item>
         <el-descriptions-item label="账号创建时间">{{user.createTime}}</el-descriptions-item>
       </el-descriptions>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" size="default" @click="userInfoVisible = false">确认</el-button>
+        </div>
+      </template>
     </el-dialog>
 
   </el-container>
@@ -194,12 +203,16 @@ const selectChat = (session: Session) => {
 let userInfoVisible = ref(false);
 const showInfo = () => {
   userInfoVisible.value = true;
-  console.log(user);
 }
 
 // 重置密码
 const resetPassword = () => {
   console.log("重置密码");
+}
+
+// 查看账单
+const showBill = () => {
+  console.log("查看账单")
 }
 
 // 退出登录
