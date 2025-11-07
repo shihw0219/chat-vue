@@ -18,7 +18,7 @@ router.beforeEach(async (to, from, next) => {
                 path: '/main/index'
             });
         }else {
-            if (to.path === "/main/chat"){
+            if (to.path === "/main/chat"||to.path === "/main/chat/"){
                 let sessionStore = useSessionStore();
                 if (sessionStore.currentSessionId===null || sessionStore.currentSessionId===''){
                     next({

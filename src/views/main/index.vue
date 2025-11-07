@@ -196,7 +196,9 @@ currentSessionWatch();
 // 选择聊天
 const selectChat = (session: Session) => {
   sessionStore.currentSessionId.value = session.id;
-  router.push('/main/chat');
+  router.push({
+    path: `/main/chat/${session.id}`
+  });
 }
 
 // 显示个人信息
@@ -255,7 +257,7 @@ const toIndex = () => {
 }
 
 .aside {
-  width: 260px;
+  width: 14%;
   background-color: #f9fafb;
   border-right: 1px solid #e5e7eb;
   display: flex;
@@ -429,12 +431,6 @@ const toIndex = () => {
   transition: all 0.3s ease;
 }
 
-.avatarInfo {
-  color: #000;
-  font-size: 18px;
-  font-weight: 800;
-}
-
 .info-col {
   padding-left: 10px;
 }
@@ -459,7 +455,9 @@ const toIndex = () => {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
   padding: 0;
   overflow: hidden;
+  overflow-y: auto;
 }
 </style>

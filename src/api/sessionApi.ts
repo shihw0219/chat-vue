@@ -7,3 +7,11 @@ export function sessionListApi(){
         method: "GET"
     });
 }
+
+export function getSessionByIdApi(id:string){
+    return request({
+        url: "/session/getSessionById/" + id,
+        method: "GET",
+        loading: false
+    });
+}
