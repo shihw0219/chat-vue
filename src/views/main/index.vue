@@ -257,7 +257,7 @@ const toIndex = () => {
 }
 
 .aside {
-  width: 14%;
+  width: 15%;
   background-color: #f9fafb;
   border-right: 1px solid #e5e7eb;
   display: flex;
@@ -457,7 +457,7 @@ const toIndex = () => {
   height: 100%;
   width: 100%;
   padding: 0;
-  overflow: hidden;
-  overflow-y: auto;
 }
+
+
 </style>
