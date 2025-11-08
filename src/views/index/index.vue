@@ -65,6 +65,7 @@ getModelList();
 // 切换模型
 const changeModel = (model:Model) => {
   currentModel.value = model;
+  isBtnDisabled();
 }
 
 // 发送按钮是否禁用

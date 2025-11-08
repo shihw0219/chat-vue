@@ -44,3 +44,14 @@ export interface Session {
     updateTime:string
     deleted:number
 }
+
+export interface Message {
+    id:string,
+    content:string,
+    inputTokens:number,
+    outputTokens:number,
+    deleted:number,
+    sessionId:string,
+    createTime:string,
+    type:number
+}

@@ -1,13 +1,12 @@
 <template>
   <div class="outBox">
     <div class="title">
-      <el-input class="titleInput" v-model="sessionTitle" />
       <el-dropdown
           placement="bottom-start"
           trigger="click"
           class="modelDrop"
       >
-        <el-button class="modelBtn" type="warning" round :icon="Tools" color="#eef3fd">模型</el-button>
+        <el-button class="modelBtn" type="warning" round :icon="Tools" color="#eef3fd">{{currentModel===null?'请选择模型':currentModel.name}}</el-button>
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item @click="changeModel(item)" v-for="item in modelList" :key="item.id" :disabled="item.enabled===0">
@@ -19,33 +18,10 @@
     </div>
     <div class="contentBox">
       <div class="content">
-        <div>aaaa</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>11</div>
-        <div>cccc</div>
+        <div v-for="item in messageList" :key="item.id" :class="item.type===0?'robotBox':'personBox'">
+          <div class="messageContent">{{item.content}}</div>
+          <div class="messageTime">{{item.createTime}}</div>
+        </div>
       </div>
     </div>
     <div class="inputBox">
@@ -60,31 +36,32 @@
 <script setup lang="ts" name="index">
 // 接收会话ID
 import {useRoute} from "vue-router";
-import {onUpdated, type Ref, ref, watch} from "vue";
+import {type Ref, ref, watch, nextTick, onMounted} from "vue";
 import {useSessionStore} from "@/stores/sessionStore.ts";
-import {storeToRefs} from "pinia";
 import {getSessionByIdApi} from "@/api/sessionApi.ts";
-import type {Model, Result, Session} from "@/data/model.ts";
+import type {Message, Model, Result} from "@/data/model.ts";
 import {ElMessage} from "element-plus";
-import router from "@/router";
 import {ArrowUpBold, Tools} from "@element-plus/icons-vue";
-import {modelListApi} from "@/api/modelApi.ts";
+import {getModelByIdApi, modelListApi} from "@/api/modelApi.ts";
 const route = useRoute();
 const sessionStore = useSessionStore();
+
 // 获取会话ID
 let sessionId:Ref<string> = ref(route.params.id) as Ref<string>;
 sessionStore.currentSessionId = sessionId.value;
 watch(route, (to, from) => {
   sessionId.value = to.params.id as string;
   getSessionInfoById();
+  getModelList();
+  text.value = '';
+  scrollToBottom();
 })
 
-// 获取会话标题
-let sessionTitle:Ref<string> = ref('');
+// 获取会话当前模型
 const getSessionInfoById = () => {
   getSessionByIdApi(sessionId.value).then((res:Result) => {
     if (res.code === 200) {
-      sessionTitle.value = res.data.title;
+      getModelById(res.data.currentModelId);
       return;
     }
     ElMessage.error(res.message);
@@ -92,37 +69,41 @@ const getSessionInfoById = () => {
 }
 getSessionInfoById();
 
-let text = ref('');
-
-let currentModel:Ref<Model|null> = ref(null);
+// 获取模型列表
 let modelList:Ref<Model[]> = ref([]);
 const getModelList = () => {
   modelListApi().then((res:Result) => {
     if (res.code === 200) {
       modelList.value = res.data;
-      if (modelList.value.length > 0 && modelList.value[0]!==undefined) {
-        modelList.value.forEach(item => {
-          if (item.enabled===1) {
-            currentModel.value = item;
-            isBtnDisabled();
-          }
-        })
-      }
       return;
     }
     ElMessage.error(res.message);
   })
 }
 getModelList();
-// 切换模型
+
+// 模型切换
+let currentModel:Ref<Model|null> = ref(null);
 const changeModel = (model:Model) => {
   currentModel.value = model;
+  isBtnDisabled();
+}
+// 根据模型ID查询模型信息
+const getModelById = (modelId:string) => {
+  getModelByIdApi(modelId).then((res:Result) => {
+    if (res.code === 200) {
+      currentModel.value = res.data;
+      isBtnDisabled();
+      return;
+    }
+    ElMessage.error(res.message);
+  })
 }
 
 // 发送按钮是否禁用
 let btnDisabled:Ref<boolean> = ref(true);
 const isBtnDisabled = () => {
-  if (currentModel===null || text.value.trim().length===0) {
+  if (currentModel.value===null || text.value.trim().length===0) {
     btnDisabled.value = true;
   }else {
     btnDisabled.value = false;
@@ -132,6 +113,139 @@ const inputChange = () => {
   isBtnDisabled();
 }
 
+// 获取聊天信息列表
+let messageList:Ref<Message[]> = ref([
+    {
+      id: '1',
+      content: '你好，我需要你的帮助',
+      inputTokens: 0,
+      outputTokens: 0,
+      deleted: 0,
+      sessionId: '1f5e1w651e',
+      createTime: '2023-07-01 10:00:00',
+      updateTime: '2023-07-01 10:00:00',
+      type: 1
+    },
+    {
+      id: '2',
+      content: '请输入您的疑问',
+      inputTokens: 0,
+      outputTokens: 0,
+      deleted: 0,
+      sessionId: '1f5e1w651e',
+      createTime: '2023-07-01 10:00:00',
+      updateTime: '2023-07-01 10:00:00',
+      type: 0
+    },
+    {
+      id: '3',
+      content: '今天的天气怎么样',
+      inputTokens: 0,
+      outputTokens: 0,
+      deleted: 0,
+      sessionId: '1f5e1w651e',
+      createTime: '2023-07-01 10:00:00',
+      updateTime: '2023-07-01 10:00:00',
+      type: 1
+    },
+    {
+      id: '4',
+      content: '今天是星期五，天气晴朗，适合出去玩',
+      inputTokens: 0,
+      outputTokens: 0,
+      deleted: 0,
+      sessionId: '1f5e1w651e',
+      createTime: '2023-07-01 10:00:00',
+      updateTime: '2023-07-01 10:00:00',
+      type: 0
+    },
+    {
+      id: '5',
+      content: '今天的天气怎么样',
+      inputTokens: 0,
+      outputTokens: 0,
+      deleted: 0,
+      sessionId: '1f5e1w651e',
+      createTime: '2023-07-01 10:00:00',
+      updateTime: '2023-07-01 10:00:00',
+      type: 1
+    },
+    {
+      id: '6',
+      content: '今天是星期五，天气晴朗，适合出去玩',
+      inputTokens: 0,
+      outputTokens: 0,
+      deleted: 0,
+      sessionId: '1f5e1w651e',
+      createTime: '2023-07-01 10:00:00',
+      updateTime: '2023-07-01 10:00:00',
+      type: 0
+    },
+    {
+      id: '7',
+      content: '今天的天气怎么样',
+      inputTokens: 0,
+      outputTokens: 0,
+      deleted: 0,
+      sessionId: '1f5e1w651e',
+      createTime: '2023-07-01 10:00:00',
+      updateTime: '2023-07-01 10:00:00',
+      type: 1
+    },
+    {
+      id: '8',
+      content: '今天是星期五，天气晴朗，适合出去玩',
+      inputTokens: 0,
+      outputTokens: 0,
+      deleted: 0,
+      sessionId: '1f5e1w651e',
+      createTime: '2023-07-01 10:00:00',
+      updateTime: '2023-07-01 10:00:00',
+      type: 0
+    },
+    {
+      id: '9',
+      content: '今天的天气怎么样',
+      inputTokens: 0,
+      outputTokens: 0,
+      deleted: 0,
+      sessionId: '1f5e1w651e',
+      createTime: '2023-07-01 10:00:00',
+      updateTime: '2023-07-01 10:00:00',
+      type: 1
+    },
+    {
+      id: '10',
+      content: '今天是星期五，天气晴朗，适合出去玩',
+      inputTokens: 0,
+      outputTokens: 0,
+      deleted: 0,
+      sessionId: '1f5e1w651e',
+      createTime: '2023-07-01 10:00:00',
+      updateTime: '2023-07-01 10:00:00',
+      type: 0
+    }
+]);
+
+// 输入框内容
+let text = ref('');
+
+// 页面滚动到底部
+const scrollToBottom = () => {
+  nextTick(() => {
+    const outBox = document.querySelector('.outBox');
+    if (outBox) {
+      outBox.scrollTo({
+        top: outBox.scrollHeight,
+        // behavior: 'smooth'
+      });
+    }
+  });
+};
+onMounted(() => {
+  scrollToBottom();
+});
+
 </script>
 
 <style scoped>
@@ -140,7 +254,7 @@ const inputChange = () => {
   width: 100%;
   height: 100vh;
   padding: 0;
-  overflow-y: auto; /* 页面级滚动条 */
+  overflow-y: auto;
 }
 
 .title {
@@ -164,14 +278,6 @@ const inputChange = () => {
   padding: 0 10%; /* 与标题和输入框的内边距保持一致 */
 }
 
-.content {
-  width: 100%;
-  min-height: 100%;
-  background-color: #e0e2e6;
-  box-sizing: border-box;
-  padding: 15px;
-}
-
 .inputBox {
   position: sticky;
   bottom: 0;
@@ -193,32 +299,6 @@ const inputChange = () => {
   justify-content: center;
 }
 
-.titleInput {
-  display: flex;
-  width: 15%;
-  text-align: center;
-  border-radius: 30px;
-  transition: box-shadow 0.3s ease;
-}
-
-.titleInput:hover {
-  border: 1px solid #c7cccc !important;
-  box-shadow: 0px 0px 30px 1px rgba(0,0,0,0.1);
-}
-
-.titleInput:focus-within {
-  border: 1px solid #787fef !important;
-}
-
-:deep(.titleInput .el-input__inner) {
-  text-align: center;
-}
-
-:deep(.titleInput .el-input__wrapper) {
-  box-shadow: none !important;
-  background: transparent !important;
-}
-
 /* 自定义页面滚动条样式 */
 .outBox::-webkit-scrollbar {
   width: 8px;
@@ -238,17 +318,73 @@ const inputChange = () => {
   background: #787fef;
 }
 .modelDrop {
-  position: relative;
-  left: 35%;
-  width: 12%;
+  width: auto;
   height: 40px;
 }
 .modelBtn {
   height: 40px;
-  width: 100%;
+  width: auto;
+  margin: 0 auto;
   transition: all 0.3s ease;
 }
 .modelBtn:hover {
   box-shadow: 0px 0px 30px 1px rgba(0,0,0,0.1);
+}
+.content {
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+.robotBox {
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  max-width: 50%;
+  background-color: bisque;
+  word-break: break-word;
+  padding: 10px 15px 10px 15px;
+  border-radius: 10px;
+  box-sizing: border-box;
+  align-self: flex-start;
+  margin-bottom: 10px;
+}
+.robotBox .messageContent {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 5px;
+}
+.robotBox .messageTime {
+  font-size: 12px;
+  color: #666;
+  text-align: left;
+}
+
+.personBox {
+  display: flex;
+  flex-direction: column;
+  width: auto;
+  max-width: 50%;
+  background-color: #4363f5;
+  color: white;
+  word-break: break-word;
+  padding: 10px 15px 10px 15px;
+  border-radius: 10px;
+  box-sizing: border-box;
+  margin-left: auto;
+  align-self: flex-end;
+  margin-bottom: 10px;
+}
+.personBox .messageContent {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 5px;
+}
+.personBox .messageTime {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: right;
 }
 </style>

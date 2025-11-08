@@ -8,3 +8,11 @@ export function modelListApi(){
         loading: false
     });
 }
+
+export function getModelByIdApi(id:string){
+    return request({
+        url: `/model/getModelById/${id}`,
+        method: "GET",
+        loading: false
+    });
+}
