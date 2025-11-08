@@ -32,6 +32,13 @@ const request = (option:any)=>{
             loginUser.token = response.headers['Fresh-Token'];
             localStorage.setItem("login_user", JSON.stringify(loginUser));
         }
+        const tokenErrorCode:number[] = [401,1003,1004,1005,1006,1007,1008];
+        if(response.data.code in tokenErrorCode) {
+            ElMessage.error(response.data.message);
+            localStorage.removeItem("login_user");
+            localStorage.removeItem("token");
+            router.push("/login");
+        }
         // if (response.data.code===401) {
         //     ElMessage.error(response.data.message);
         //     localStorage.removeItem("login_user");
