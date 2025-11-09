@@ -22,3 +22,9 @@ export interface UserRest{
     code: string,
     confirmPassword: string
 }
+
+export interface MessageRequest {
+    content: string,
+    sessionId: string
+    modelId?: string
+}

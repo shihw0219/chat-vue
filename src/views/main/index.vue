@@ -33,8 +33,8 @@
               @mouseleave="currentHover=null"
             >
               <span class="history-title">
-                {{item.title}}
                 <el-icon v-if="item.isTop===1" color="#4c88f4"><Flag /></el-icon>
+                {{item.title}}
               </span>
               <el-dropdown 
                 placement="bottom-start"

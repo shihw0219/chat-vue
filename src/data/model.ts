@@ -46,10 +46,9 @@ export interface Session {
 }
 
 export interface Message {
-    id:string,
+    id?:string,
     content:string,
-    inputTokens:number,
-    outputTokens:number,
+    tokens:number,
     deleted:number,
     sessionId:string,
     createTime:string,
