@@ -19,7 +19,14 @@
     <div class="contentBox">
       <div class="content">
         <div v-for="(item,index) in messageList" :key="index"  class="messageWrapper" :class="item.type===0?'robotWrapper':'personWrapper'">
-          <div class="messageContentBox" v-if="item.content!==''">{{item.content}}</div>
+          <div class="messageContentBox" v-if="item.content!==''">
+            <VueShowdown
+                :markdown="item.content"
+                flavor="github"
+                :options="shownDownOptions"
+                :extensions="extensions"
+            />
+          </div>
           <div class="messageTime" v-if="item.content!==''">{{item.createTime}}</div>
         </div>
         <el-alert v-show="alertShow" :class="alertClass" title="正在思考..." :closable="false" type="warning" center show-icon />
@@ -48,8 +55,20 @@ import {getMessageBySessionIdApi, insertMessageApi} from "@/api/messageApi.ts";
 import type {MessageRequest} from "@/data/requestModel.ts";
 import {SSE} from "sse.js";
 import router from "@/router";
+
 const route = useRoute();
 const sessionStore = useSessionStore();
+
+// shownDown配置
+let shownDownOptions = ref({
+  emoji: true,
+  tables:true,
+  smoothLivePreview:true,
+  ghCodeBlocks:true,
+  splitAdjacentBlockquotes:true
+})
+const extensions = ref(['code-highlight'])
+
 
 // 获取会话ID
 let sessionId:Ref<string> = ref(route.params.id) as Ref<string>;
@@ -216,7 +235,7 @@ const sendMessage = async () => {
   eventSource.addEventListener('error', (event:any) => {
     const tokenErrorCode:number[] = [401,1003,1004,1005,1006,1007,1008];
     let response = JSON.parse(event.data);
-    if (response.code in tokenErrorCode) {
+    if (tokenErrorCode.includes(response.code)) {
       ElMessage.error(response.message);
       localStorage.removeItem("login_user");
       localStorage.removeItem("token");
@@ -389,7 +408,7 @@ const scrollToBottom = () => {
 .robotWrapper .messageContentBox {
   width: auto;
   max-width: 55%;
-  background-color: bisque;
+  background-color: #f1f1f1;
   word-break: break-word;
   padding: 10px 15px 10px 15px;
   border-radius: 10px;
@@ -425,5 +444,88 @@ const scrollToBottom = () => {
   text-align: right;
   margin-top: 5px;
   margin-right: 5px;
+}
+
+/* 修复VueShowdown渲染的列表和表格样式问题 */
+.messageContentBox :deep(ol) {
+  padding-left: 20px;
+  margin-left: 0;
+}
+
+.messageContentBox :deep(ol > li) {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.messageContentBox :deep(ul) {
+  padding-left: 20px;
+  margin-left: 0;
+}
+
+.messageContentBox :deep(ul > li) {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.messageContentBox :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 10px 0;
+}
+
+.messageContentBox :deep(th),
+.messageContentBox :deep(td) {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.messageContentBox :deep(th) {
+  background-color: #c2daf1;
+}
+
+.messageContentBox :deep(tr:nth-child(even)) {
+  background-color: #f9f9f9;
+}
+.messageContentBox :deep(tr:nth-child(odd )) {
+  background-color: #e2edf3;
+}
+
+
+/* 代码高亮样式 */
+.messageContentBox :deep(pre) {
+  position: relative;
+  background: #2d2d2d !important;
+  border-radius: 8px;
+  padding: 1.5em !important;
+  margin: 1em 0 !important;
+  overflow: auto;
+}
+
+.messageContentBox :deep(pre code) {
+  background: transparent !important;
+  padding: 0 !important;
+  color: #f8f8f2 !important;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', monospace !important;
+  font-size: 0.9em !important;
+  line-height: 1.5 !important;
+}
+
+/* 确保 hljs 类样式生效 */
+.messageContentBox :deep(.hljs) {
+  background: transparent !important;
+  display: block !important;
+  overflow-x: auto !important;
+  padding: 0 !important;
+}
+
+/* 机器人消息中的代码块 */
+.robotWrapper .messageContentBox :deep(pre) {
+  background: #2d2d2d !important;
+}
+
+/* 用户消息中的代码块（如果需要不同的样式） */
+.personWrapper .messageContentBox :deep(pre) {
+  background: #1a365d !important;
 }
 </style>
