@@ -48,19 +48,16 @@ showdown.extension('code-highlight', () => {
         {
             type: 'output',
             filter: function(text: string) {
-                console.log("=== Code Highlight Extension Called ===")
                 if (!text) return text
                 // 匹配代码块
                 const codeBlockRegex = /<pre><code\s*([^>]*)>([\s\S]*?)<\/code><\/pre>/gi
                 const result = text.replace(codeBlockRegex, function(match, attributes, code) {
-                    console.log("Found code block to highlight")
                     // 提取语言
                     let lang = 'plaintext'
                     const langMatch = attributes.match(/class="language-([^"]*)"/)
                     if (langMatch) {
                         lang = langMatch[1]
                     }
-                    console.log("Language:", lang)
                     try {
                         // 解码 HTML 实体
                         const decodedCode = code
@@ -76,19 +73,15 @@ showdown.extension('code-highlight', () => {
                                 language: lang,
                                 ignoreIllegals: true
                             }).value
-                            console.log("Manual highlight successful for language:", lang)
                         } else {
                             const autoResult = hljs.highlightAuto(decodedCode)
                             highlighted = autoResult.value
-                            console.log("Auto highlight successful, detected:", autoResult.language)
                         }
                         return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`
                     } catch (err) {
-                        console.error('Highlight error:', err)
                         return match // 出错时返回原内容
                     }
                 })
-                console.log("=== Code Highlight Extension Finished ===")
                 return result
             }
         }

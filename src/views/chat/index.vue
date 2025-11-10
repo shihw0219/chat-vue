@@ -43,7 +43,7 @@
 
 <script setup lang="ts" name="index">
 // 接收会话ID
-import {useRoute} from "vue-router";
+import {onBeforeRouteUpdate, useRoute} from "vue-router";
 import {type Ref, ref, watch, nextTick, onMounted, watchEffect} from "vue";
 import {useSessionStore} from "@/stores/sessionStore.ts";
 import {getSessionByIdApi} from "@/api/sessionApi.ts";
@@ -55,6 +55,7 @@ import {getMessageBySessionIdApi, insertMessageApi} from "@/api/messageApi.ts";
 import type {MessageRequest} from "@/data/requestModel.ts";
 import {SSE} from "sse.js";
 import router from "@/router";
+import {storeToRefs} from "pinia";
 
 const route = useRoute();
 const sessionStore = useSessionStore();
@@ -69,16 +70,29 @@ let shownDownOptions = ref({
 })
 const extensions = ref(['code-highlight'])
 
+// 输入框内容
+let text = ref('');
 
 // 获取会话ID
 let sessionId:Ref<string> = ref(route.params.id) as Ref<string>;
+let content:Ref<string> = ref(sessionStore.currentContent);
+sessionStore.currentContent = '';
 sessionStore.currentSessionId = sessionId.value;
+onBeforeRouteUpdate(async (to, from) => {
+  if (eventSource !== null) {
+    eventSource.close();
+  }
+  inputDisabled.value = false;
+  isAnswering.value = false;
+  text.value = '';
+})
 watch(route, (to, from) => {
   sessionId.value = to.params.id as string;
   getSessionInfoById();
   getModelList();
   text.value = '';
   getMessageList();
+  myLoading.value = true;
 })
 
 // 获取会话当前模型
@@ -110,14 +124,20 @@ getModelList();
 let currentModel:Ref<Model|null> = ref(null);
 const changeModel = (model:Model) => {
   currentModel.value = model;
-  // isBtnDisabled();
 }
 // 根据模型ID查询模型信息
 const getModelById = (modelId:string) => {
   getModelByIdApi(modelId).then((res:Result) => {
     if (res.code === 200) {
       currentModel.value = res.data;
-      // isBtnDisabled();
+
+      // 主页跳转过来
+      if (content.value!==null && content.value!==undefined && content.value.trim().length > 0) {
+        text.value = content.value;
+        content.value = '';
+        sendMessage();
+      }
+
       return;
     }
     ElMessage.error(res.message);
@@ -126,7 +146,11 @@ const getModelById = (modelId:string) => {
 
 // 获取聊天信息列表
 let messageList:Ref<Message[]> = ref([]);
-const getMessageList =  async (loading:boolean = true) => {
+let myLoading = ref(true);
+if (content !== null && content.value!==undefined && content.value.trim().length > 0){
+  myLoading.value = false;
+}
+const getMessageList =  async (loading:boolean = myLoading.value) => {
   await getMessageBySessionIdApi(sessionId.value,loading).then((res:Result) => {
     if (res.code === 200) {
       messageList.value = res.data;
@@ -138,8 +162,7 @@ const getMessageList =  async (loading:boolean = true) => {
 }
 getMessageList();
 
-// 输入框内容
-let text = ref('');
+
 // 是否正在回答
 let isAnswering = ref(false);
 // 发送按钮是否禁用
@@ -161,6 +184,7 @@ let inputDisabled = ref(false);
 // 正在思考是否显示
 let alertShow = ref(false);
 
+let eventSource:any = null;
 // 发送消息
 const sendMessage = async () => {
   const params:MessageRequest = {
@@ -195,7 +219,7 @@ const sendMessage = async () => {
   scrollToBottom()
   inputDisabled.value = false;
 
-  const eventSource = new SSE(import.meta.env.VITE_APP_BASE_URL + "/message/chat", {
+  eventSource = new SSE(import.meta.env.VITE_APP_BASE_URL + "/message/chat", {
     withCredentials:true,
     start:false,
     headers : {'Content-Type':'application/json;charset=UTF-8','Authorization':'Bearer '+localStorage.getItem("token") as string},
@@ -263,15 +287,15 @@ const sendMessage = async () => {
   eventSource.stream();
 }
 
+
+
 const checkAndScroll = () => {
   // 获取滚动容器（可能是窗口或特定元素）
   const container = scrollDiv.value || document.documentElement;
   const scrollTop = container === document.documentElement ? window.pageYOffset : container.scrollTop;
   const clientHeight = container === document.documentElement ? window.innerHeight : container.clientHeight;
   const scrollHeight = container.scrollHeight;
-
   const threshold = 50; // 距离底部50像素内就自动滚动
-  console.log(scrollHeight - (scrollTop + clientHeight))
   if (scrollHeight - (scrollTop + clientHeight) <= threshold) {
     scrollToBottom();
   }
@@ -491,6 +515,102 @@ const scrollToBottom = () => {
   background-color: #e2edf3;
 }
 
+/* 美化整体消息样式 */
+.messageContentBox :deep(*) {
+  line-height: 1.6;
+}
+
+.messageContentBox :deep(p) {
+  margin: 10px 0;
+  line-height: 1.6;
+}
+
+/* 优化标题样式 */
+.messageContentBox :deep(h1),
+.messageContentBox :deep(h2),
+.messageContentBox :deep(h3),
+.messageContentBox :deep(h4),
+.messageContentBox :deep(h5),
+.messageContentBox :deep(h6) {
+  margin: 15px 0 10px 0;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.messageContentBox :deep(h1) {
+  font-size: 1.8em;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.3em;
+}
+
+.messageContentBox :deep(h2) {
+  font-size: 1.5em;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.3em;
+}
+
+.messageContentBox :deep(h3) {
+  font-size: 1.3em;
+}
+
+.messageContentBox :deep(h4) {
+  font-size: 1.2em;
+}
+
+.messageContentBox :deep(h5) {
+  font-size: 1.1em;
+}
+
+.messageContentBox :deep(h6) {
+  font-size: 1em;
+}
+
+/* 优化段落和文本样式 */
+.messageContentBox :deep(p) {
+  margin: 0 0 10px 0;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+/* 优化列表样式 */
+.messageContentBox :deep(ol),
+.messageContentBox :deep(ul) {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.messageContentBox :deep(li) {
+  margin: 5px 0;
+  line-height: 1.6;
+}
+
+.messageContentBox :deep(li p) {
+  margin: 0;
+}
+
+/* 优化块引用样式 */
+.messageContentBox :deep(blockquote) {
+  margin: 10px 0;
+  padding: 10px 15px;
+  border-left: 4px solid #1b9131;
+  background-color: rgba(152, 228, 119, 0.4);
+  color: #666;
+}
+
+.messageContentBox :deep(blockquote p) {
+  margin: 0;
+}
+
+/* 行内代码样式 */
+.messageContentBox :deep(code) {
+  background-color: #f3ccdb;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: 0 2px;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 0.9em;
+  vertical-align: middle;
+}
 
 /* 代码高亮样式 */
 .messageContentBox :deep(pre) {
@@ -509,14 +629,6 @@ const scrollToBottom = () => {
   font-family: 'Fira Code', 'Consolas', 'Monaco', monospace !important;
   font-size: 0.9em !important;
   line-height: 1.5 !important;
-}
-
-/* 确保 hljs 类样式生效 */
-.messageContentBox :deep(.hljs) {
-  background: transparent !important;
-  display: block !important;
-  overflow-x: auto !important;
-  padding: 0 !important;
 }
 
 /* 机器人消息中的代码块 */

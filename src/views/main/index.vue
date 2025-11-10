@@ -154,7 +154,7 @@
 </template>
 
 <script setup lang="ts" name="AppMain">
-import {type Ref, ref, watch} from 'vue'
+import {provide, type Ref, ref, watch} from 'vue'
 import type {Result, Session, UserInfo} from "@/data/model.ts";
 import {Edit} from '@element-plus/icons-vue'
 import router from "@/router";
@@ -170,8 +170,8 @@ let user:UserInfo = JSON.parse(<string>localStorage.getItem("login_user"));
 
 // 获取聊天列表
 const sessionHistory:Ref<Session[]> = ref([])
-const getSessionList = () => {
-  sessionListApi().then((res:Result) => {
+const getSessionList = async (loading: boolean=true) => {
+  await sessionListApi(loading).then((res:Result) => {
     if (res.code !== 200) {
       ElMessage({
         message: res.message,
@@ -248,6 +248,8 @@ const logout = () => {
 const toIndex = () => {
   router.push('/');
 }
+
+provide('getSessionList', getSessionList)
 </script>
 
 <style scoped>
