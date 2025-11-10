@@ -46,13 +46,13 @@
 import {onBeforeRouteUpdate, useRoute} from "vue-router";
 import {type Ref, ref, watch, nextTick, onMounted, watchEffect} from "vue";
 import {useSessionStore} from "@/stores/sessionStore.ts";
-import {getSessionByIdApi} from "@/api/sessionApi.ts";
+import {changeModelApi, getSessionByIdApi} from "@/api/sessionApi.ts";
 import type {Message, Model, Result, UserInfo} from "@/data/model.ts";
 import {ElMessage} from "element-plus";
 import {ArrowUpBold, Tools} from "@element-plus/icons-vue";
 import {getModelByIdApi, modelListApi} from "@/api/modelApi.ts";
 import {getMessageBySessionIdApi, insertMessageApi} from "@/api/messageApi.ts";
-import type {MessageRequest} from "@/data/requestModel.ts";
+import type {ChangeModelRequest, MessageRequest} from "@/data/requestModel.ts";
 import {SSE} from "sse.js";
 import router from "@/router";
 import {storeToRefs} from "pinia";
@@ -91,7 +91,7 @@ watch(route, (to, from) => {
   getSessionInfoById();
   getModelList();
   text.value = '';
-  getMessageList();
+  getMessageList(myLoading.value,false);
   myLoading.value = true;
 })
 
@@ -123,7 +123,17 @@ getModelList();
 // 模型切换
 let currentModel:Ref<Model|null> = ref(null);
 const changeModel = (model:Model) => {
-  currentModel.value = model;
+  let changeModelRequest:ChangeModelRequest = {
+    sessionId:sessionId.value,
+    modelId:model.id
+  }
+  changeModelApi(changeModelRequest).then((res:Result) => {
+    if (res.code === 200) {
+      currentModel.value = model;
+      return;
+    }
+    ElMessage.error(res.message);
+  })
 }
 // 根据模型ID查询模型信息
 const getModelById = (modelId:string) => {
@@ -150,17 +160,17 @@ let myLoading = ref(true);
 if (content !== null && content.value!==undefined && content.value.trim().length > 0){
   myLoading.value = false;
 }
-const getMessageList =  async (loading:boolean = myLoading.value) => {
+const getMessageList =  async (loading:boolean = myLoading.value,smooth:boolean = true) => {
   await getMessageBySessionIdApi(sessionId.value,loading).then((res:Result) => {
     if (res.code === 200) {
       messageList.value = res.data;
-      scrollToBottom();
+      scrollToBottom(smooth);
       return;
     }
     ElMessage.error(res.message);
   })
 }
-getMessageList();
+getMessageList(myLoading.value,false);
 
 
 // 是否正在回答
@@ -315,13 +325,19 @@ const handleKeyDown = (event:any) => {
 
 // 页面滚动到底部
 const scrollDiv:any = ref(null)
-const scrollToBottom = () => {
+const scrollToBottom = (smooth:boolean=true) => {
   nextTick(() => {
     if (scrollDiv) {
-      scrollDiv.value.scrollTo({
-        top: scrollDiv.value.scrollHeight,
-        behavior: 'smooth'
-      });
+      if (smooth) {
+        scrollDiv.value.scrollTo({
+          top: scrollDiv.value.scrollHeight,
+          behavior: 'smooth'
+        });
+      }else {
+        scrollDiv.value.scrollTo({
+          top: scrollDiv.value.scrollHeight
+        });
+      }
     }
   });
 };

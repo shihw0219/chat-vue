@@ -28,3 +28,13 @@ export interface MessageRequest {
     sessionId: string
     modelId?: string
 }
+
+export interface ChangeModelRequest{
+    sessionId: string
+    modelId: string
+}
+
+export interface UpdateSessionNameRequest {
+    sessionId: string,
+    sessionName: string
+}

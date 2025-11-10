@@ -4,11 +4,11 @@
       <div class="sidebar-header">
         <el-row class="logo-row">
           <el-col class="logo-container" :span="24">
-            <el-image 
-              src="https://image0219.oss-cn-hangzhou.aliyuncs.com/images/logo_1.png" 
-              class="logo hvr-pulse-grow"
-              fit="contain"
-              @click="toIndex"
+            <el-image
+                src="https://image0219.oss-cn-hangzhou.aliyuncs.com/images/logo_1.png"
+                class="logo hvr-pulse-grow"
+                fit="contain"
+                @click="toIndex"
             />
           </el-col>
         </el-row>
@@ -23,49 +23,50 @@
       <el-row class="history-row">
         <el-col :span="24">
           <div class="history-list">
-            <div 
-              v-for="item in sessionHistory"
-              :key="item.id" 
-              class="history-item"
-              :class="{ active: item.id === currentSessionId,top:item.isTop===1 }"
-              @click="selectChat(item)"
-              @mouseenter="currentHover=item.id"
-              @mouseleave="currentHover=null"
+            <div v-if="sessionHistory.length === 0"><el-empty :image-size="100" description="暂无会话" /></div>
+            <div
+                v-for="item in sessionHistory"
+                :key="item.id"
+                class="history-item"
+                :class="{ active: item.id === currentSessionId,top:item.isTop===1 }"
+                @click="selectChat(item)"
+                @mouseenter="currentHover=item.id"
+                @mouseleave="currentHover=null"
             >
               <span class="history-title">
                 <el-icon v-if="item.isTop===1" color="#4c88f4"><Flag /></el-icon>
                 {{item.title}}
               </span>
-              <el-dropdown 
-                placement="bottom-start"
-                trigger="hover"
-                style="width: 20%;"
+              <el-dropdown
+                  placement="bottom-start"
+                  trigger="hover"
+                  style="width: 20%;"
               >
                 <transition name="el-fade-in-linear">
                   <el-button size="small" v-if="currentHover===item.id || currentSessionId===item.id" class="more">···</el-button>
                 </transition>
                 <template #dropdown>
                   <el-dropdown-menu  @mouseenter="currentHover=item.id" @mouseleave="currentHover=null">
-                    <el-dropdown-item>
+                    <el-dropdown-item @click="openUpdateName(item)">
                       <el-icon :size="18" color="#606266">
                         <EditPen />
                       </el-icon>
                       重命名
                     </el-dropdown-item>
-                    <el-dropdown-item v-if="item.isTop === 0">
+                    <el-dropdown-item @click="toTop(item.id)" v-if="item.isTop === 0">
                       <el-icon :size="18" color="#606266">
                         <Upload />
                       </el-icon>
                       置顶
                     </el-dropdown-item>
-                    <el-dropdown-item v-else>
+                    <el-dropdown-item @click="cancelTop(item.id)" v-else>
                       <el-icon :size="18" color="#606266">
                         <Download />
                       </el-icon>
                       取消置顶
                     </el-dropdown-item>
 
-                    <el-dropdown-item>
+                    <el-dropdown-item @click="deleteSession(item.id)">
                       <el-icon :size="18" color="#e55765">
                         <Delete/>
                       </el-icon>
@@ -103,18 +104,18 @@
               </el-icon>
               个人信息
             </el-dropdown-item>
-            <el-dropdown-item @click="resetPassword">
-              <el-icon :size="18" color="#606266">
-                <Edit />
-              </el-icon>
-              修改密码
-            </el-dropdown-item>
-            <el-dropdown-item @click="showBill">
-              <el-icon :size="18" color="#606266">
-                <Memo />
-              </el-icon>
-              我的账单
-            </el-dropdown-item>
+            <!--<el-dropdown-item @click="resetPassword">-->
+            <!--  <el-icon :size="18" color="#606266">-->
+            <!--    <Edit />-->
+            <!--  </el-icon>-->
+            <!--  修改密码-->
+            <!--</el-dropdown-item>-->
+            <!--<el-dropdown-item @click="showBill">-->
+            <!--  <el-icon :size="18" color="#606266">-->
+            <!--    <Memo />-->
+            <!--  </el-icon>-->
+            <!--  我的账单-->
+            <!--</el-dropdown-item>-->
             <el-dropdown-item @click="logout">
               <el-icon :size="18" color="#e55765">
                 <SwitchButton />
@@ -150,6 +151,18 @@
       </template>
     </el-dialog>
 
+    <el-dialog v-model="updateNameVisible" title="修改会话名称" width="500">
+      <el-input v-model="updateSessionName" placeholder="请输入会话名称" />
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="updateNameVisible = false">取消</el-button>
+          <el-button type="primary" @click="updateSession">
+            确认
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
   </el-container>
 </template>
 
@@ -158,11 +171,12 @@ import {provide, type Ref, ref, watch} from 'vue'
 import type {Result, Session, UserInfo} from "@/data/model.ts";
 import {Edit} from '@element-plus/icons-vue'
 import router from "@/router";
-import {sessionListApi} from "@/api/sessionApi.ts";
+import {cancelTopApi, deleteSessionApi, sessionListApi, toTopApi, updateSessionNameApi} from "@/api/sessionApi.ts";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {useSessionStore} from "@/stores/sessionStore.ts";
 import {storeToRefs} from "pinia";
 import {logoutApi} from "@/api/userApi.ts";
+import type {UpdateSessionNameRequest} from "@/data/requestModel.ts";
 
 // 加载用户信息
 let currentHover:Ref<string|null> = ref(null)
@@ -220,13 +234,13 @@ const showBill = () => {
 // 退出登录
 const logout = () => {
   ElMessageBox.confirm(
-    '您正在退出登录，是否继续?',
-    '提示',
-    {
-      confirmButtonText: '确认',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
+      '您正在退出登录，是否继续?',
+      '提示',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
   ).then(() => {
     logoutApi().then((res:Result) => {
       if (res.code !== 200) {
@@ -241,6 +255,91 @@ const logout = () => {
       localStorage.removeItem("token");
       router.push('/login');
     })
+  })
+}
+// 置顶会话
+const toTop = (id:string) => {
+  toTopApi(id).then((res:Result) => {
+    if (res.code !== 200) {
+      ElMessage({
+        message: res.message,
+        type: 'error',
+      })
+      return;
+    }
+    getSessionList(false);
+  })
+}
+// 取消置顶会话
+const cancelTop = (id:string) => {
+  cancelTopApi(id).then((res:Result) => {
+    if (res.code !== 200) {
+      ElMessage({
+        message: res.message,
+        type: 'error',
+      })
+      return;
+    }
+    getSessionList(false);
+  })
+}
+// 删除会话
+const deleteSession = (id:string) => {
+  ElMessageBox.confirm(
+      '您正在删除该会话，是否继续?',
+      '提示',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+  ).then(() => {
+    deleteSessionApi(id).then((res:Result) => {
+      if (res.code !== 200) {
+        ElMessage({
+          message: res.message,
+          type: 'error',
+        })
+        return;
+      }
+      getSessionList(true);
+    })
+  })
+}
+
+// 修改会话名称
+let updateNameVisible = ref(false);
+let updateSessionName:Ref<string|null> = ref(null);
+let updateSessionId:Ref<string|null> = ref(null);
+const openUpdateName = (session:Session) => {
+  updateNameVisible.value = true;
+  updateSessionName.value = session.title;
+  updateSessionId.value = session.id;
+}
+
+const updateSession = () => {
+  if (updateSessionName.value===null || updateSessionName.value.trim().length<=0){
+    ElMessage({
+      message: '请输入会话名称',
+      type: 'error',
+    })
+    return;
+  }
+  let data:UpdateSessionNameRequest = {
+    sessionId: updateSessionId.value!,
+    sessionName: updateSessionName.value!
+  }
+  updateSessionNameApi(data).then((res:Result) => {
+    if (res.code !== 200) {
+      ElMessage({
+        message: res.message,
+        type: 'error',
+      })
+      return;
+    }
+    ElMessage.success(res.message);
+    updateNameVisible.value = false;
+    getSessionList(true);
   })
 }
 
