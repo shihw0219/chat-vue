@@ -82,7 +82,7 @@
 import {ref, reactive, onBeforeUnmount} from 'vue'
 import router from "@/router";
 import {ElMessage} from "element-plus";
-import {sendResetPasswordCode, sendResetPasswordCodeApi} from "@/api/mailApi.ts";
+import {sendResetPasswordCodeApi} from "@/api/mailApi.ts";
 import type {Result} from "@/data/model.ts";
 import type {UserRest} from "@/data/requestModel.ts";
 import {resetPasswordApi} from "@/api/userApi.ts";
