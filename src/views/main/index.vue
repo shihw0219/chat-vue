@@ -137,11 +137,11 @@
       <el-descriptions title="个人信息" border>
         <el-descriptions-item label="用户名">{{user.username}}</el-descriptions-item>
         <el-descriptions-item label="姓名">{{user.name}}</el-descriptions-item>
-        <el-descriptions-item label="联系方式">{{user.phone}}</el-descriptions-item>
+        <el-descriptions-item label="联系方式">{{(user.phone==null || user.phone.trim().length===0)? '暂无信息':user.phone}}</el-descriptions-item>
         <el-descriptions-item label="用户角色">
           <el-tag size="small" v-for="(item, i) in user.roleNames" :key="i">{{item}}</el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="邮箱">{{user.email}} K</el-descriptions-item>
+        <el-descriptions-item label="邮箱">{{user.email}}</el-descriptions-item>
         <el-descriptions-item label="账号创建时间">{{user.createTime}}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
@@ -502,7 +502,8 @@ provide('getSessionList', getSessionList)
   box-shadow: none;
   cursor: pointer;
   .avatar {
-    background-color: #d8d8d8 !important;
+    color: #ffffff;
+    background-color: #e98eed !important;
   }
 }
 

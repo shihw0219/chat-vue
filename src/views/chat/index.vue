@@ -27,6 +27,10 @@
                 :extensions="extensions"
             />
           </div>
+          <div class="copyButton" @click="copyMessage(item.content)">
+            <el-icon><CopyDocument /></el-icon>
+            <span>复制</span>
+          </div>
           <!--<div class="messageTime" v-if="item.content!==''">{{item.createTime}}</div>-->
         </div>
         <el-alert v-show="alertShow" :class="alertClass" title="正在思考..."
@@ -49,7 +53,7 @@ import {type Ref, ref, watch, nextTick, onMounted, watchEffect} from "vue";
 import {useSessionStore} from "@/stores/sessionStore.ts";
 import {changeModelApi, getSessionByIdApi} from "@/api/sessionApi.ts";
 import type {Message, Model, Result, UserInfo} from "@/data/model.ts";
-import {ElMessage} from "element-plus";
+import {ElMessage, ElNotification} from "element-plus";
 import {ArrowUpBold, Tools} from "@element-plus/icons-vue";
 import {getModelByIdApi, modelListApi} from "@/api/modelApi.ts";
 import {getMessageBySessionIdApi, insertMessageApi} from "@/api/messageApi.ts";
@@ -298,7 +302,24 @@ const sendMessage = async () => {
   eventSource.stream();
 }
 
-
+// 添加复制消息功能
+const copyMessage = (content: string) => {
+  navigator.clipboard.writeText(content).then(() => {
+    ElNotification({
+      title: '成功',
+      message: '消息已复制到剪贴板',
+      type: 'success',
+      duration: 2000
+    });
+  }).catch(err => {
+    ElNotification({
+      title: '失败',
+      message: '复制失败: ' + err,
+      type: 'error',
+      duration: 2000
+    });
+  });
+};
 
 const checkAndScroll = () => {
   // 获取滚动容器（可能是窗口或特定元素）
@@ -656,5 +677,38 @@ const scrollToBottom = (smooth:boolean=true) => {
 /* 用户消息中的代码块（如果需要不同的样式） */
 .personWrapper .messageContentBox :deep(pre) {
   background: #1a365d !important;
+}
+
+.copyButton {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 4px;
+  margin-top: 5px;
+  width: fit-content;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.messageWrapper:hover .copyButton {
+  opacity: 1;
+}
+
+.copyButton:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.robotWrapper .copyButton:hover {
+  background-color: #e0e0e0;
+}
+
+.personWrapper .copyButton:hover {
+  background-color: #e0e0e0;
+  color: #000000;
 }
 </style>
