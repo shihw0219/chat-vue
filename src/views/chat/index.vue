@@ -27,11 +27,13 @@
                 :extensions="extensions"
             />
           </div>
-          <div class="copyButton" @click="copyMessage(item.content)">
-            <el-icon><CopyDocument /></el-icon>
-            <span>复制</span>
+          <div class="messageActions">
+            <div class="messageTime" v-if="item.content!==''">{{item.createTime}}</div>
+            <div class="copyButton" @click="copyMessage(item.content)">
+              <el-icon class="copyIcon"><CopyDocument /></el-icon>
+              <span class="copyText">复制</span>
+            </div>
           </div>
-          <!--<div class="messageTime" v-if="item.content!==''">{{item.createTime}}</div>-->
         </div>
         <el-alert v-show="alertShow" :class="alertClass" title="正在思考..."
                   :closable="false" type="warning" center show-icon />
@@ -492,8 +494,8 @@ const scrollToBottom = (smooth:boolean=true) => {
 .personWrapper .messageContentBox {
   width: auto;
   max-width: 55%;
-  background-color: #4363f5;
-  color: white;
+  background-color: #d9ddf6;
+  color: #000000;
   word-break: break-word;
   padding: 10px 15px 0px 15px;
   border-radius: 10px;
@@ -679,36 +681,96 @@ const scrollToBottom = (smooth:boolean=true) => {
   background: #1a365d !important;
 }
 
-.copyButton {
+.messageActions {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  color: #666;
-  cursor: pointer;
-  padding: 5px 10px;
-  border-radius: 4px;
-  margin-top: 5px;
-  width: fit-content;
-  transition: all 0.3s ease;
+  gap: 10px;
+  margin-top: 8px;
   opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.messageWrapper:hover .copyButton {
+.messageWrapper:hover .messageActions {
   opacity: 1;
 }
 
+.messageTime {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background-color: rgba(243, 244, 246, 0.7);
+  backdrop-filter: blur(10px);
+}
+
+.robotWrapper .messageTime {
+  color: #6b7280;
+  background-color: rgba(243, 244, 246, 0.7);
+  text-align: left;
+}
+
+.personWrapper .messageTime {
+  color: #6b7280;
+  background-color: rgba(243, 244, 246, 0.7);
+  text-align: right;
+}
+
+.copyButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  width: fit-content;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.messageWrapper:hover .copyButton {
+  transform: translateY(0);
+}
+
 .copyButton:hover {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: #f3f4f6;
+  color: #1f2937;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.copyButton:active {
+  transform: scale(0.98);
 }
 
 .robotWrapper .copyButton:hover {
-  background-color: #e0e0e0;
+  background-color: #e5e7eb;
 }
 
 .personWrapper .copyButton:hover {
-  background-color: #e0e0e0;
-  color: #000000;
+  background-color: #e5e7eb;
+}
+
+.copyIcon {
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.copyButton:hover .copyIcon {
+  transform: scale(1.1);
+}
+
+.copyText {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.copyButton:hover .copyText {
+  transform: translateX(2px);
 }
 </style>
