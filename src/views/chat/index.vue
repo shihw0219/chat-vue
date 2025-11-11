@@ -27,9 +27,10 @@
                 :extensions="extensions"
             />
           </div>
-          <div class="messageTime" v-if="item.content!==''">{{item.createTime}}</div>
+          <!--<div class="messageTime" v-if="item.content!==''">{{item.createTime}}</div>-->
         </div>
-        <el-alert v-show="alertShow" :class="alertClass" title="正在思考..." :closable="false" type="warning" center show-icon />
+        <el-alert v-show="alertShow" :class="alertClass" title="正在思考..."
+                  :closable="false" type="warning" center show-icon />
       </div>
     </div>
     <div class="inputBox">
@@ -450,7 +451,7 @@ const scrollToBottom = (smooth:boolean=true) => {
   max-width: 55%;
   background-color: #f1f1f1;
   word-break: break-word;
-  padding: 10px 15px 10px 15px;
+  padding: 10px 15px 0px 15px;
   border-radius: 10px;
   box-sizing: border-box;
 }
@@ -473,7 +474,7 @@ const scrollToBottom = (smooth:boolean=true) => {
   background-color: #4363f5;
   color: white;
   word-break: break-word;
-  padding: 10px 15px 10px 15px;
+  padding: 10px 15px 0px 15px;
   border-radius: 10px;
   box-sizing: border-box;
 }
